@@ -50,114 +50,114 @@ print "Number of columns: %d" % columns
 print "Number of rows: %d" % rows
 
 class Ant:
-	def __init__(self, posx, posy):
-		#Initial position of the ant
-		self.posx = posx
-		self.posy = posy
-		self.dir = 2						#initial direction: right
-		self.dirs = (
-					(-1, 0),				#left
-					(0, 1),					#up
-					(1, 0),					#right
-					(0, -1)					#down
-					)
+    def __init__(self, posx, posy):
+        #Initial position of the ant
+        self.posx = posx
+        self.posy = posy
+        self.dir = 2                        #initial direction: right
+        self.dirs = (
+                    (-1, 0),                #left
+                    (0, 1),                    #up
+                    (1, 0),                    #right
+                    (0, -1)                    #down
+                    )
 
 
-	def turn(self, direction):
-		if direction == 'right':
-			self.dir = (self.dir + 1) % 4
-		elif direction == 'left':
-			self.dir = (self.dir + 3) % 4
+    def turn(self, direction):
+        if direction == 'right':
+            self.dir = (self.dir + 1) % 4
+        elif direction == 'left':
+            self.dir = (self.dir + 3) % 4
 
-		self.posx = (self.posx + self.dirs[self.dir][0]) % columns
-		self.posy = (self.posy + self.dirs[self.dir][1]) % rows
+        self.posx = (self.posx + self.dirs[self.dir][0]) % columns
+        self.posy = (self.posy + self.dirs[self.dir][1]) % rows
 
 
 
 class Grid(window.Window):
 
-	def __init__(self, width, height):
-		#Let all of the standard stuff pass through
-		window.Window.__init__(self, width=width, height=height)
+    def __init__(self, width, height):
+        #Let all of the standard stuff pass through
+        window.Window.__init__(self, width=width, height=height)
 
-		#Initial position of the ant: middle of the grid
-		self.ant = Ant(columns/2, rows/2)
+        #Initial position of the ant: middle of the grid
+        self.ant = Ant(columns/2, rows/2)
 
-		#False = black cell. True = white cell.
-		self.cells = [[False] * columns for i in range(rows)]
-		self.steps = 0
-
-
-	def rectangle(self, x1, y1, x2, y2):
-		graphics.draw(4, gl.GL_QUADS, ('v2f', (x1, y1, x1, y2, x2, y2, x2, y1)))
+        #False = black cell. True = white cell.
+        self.cells = [[False] * columns for i in range(rows)]
+        self.steps = 0
 
 
-	def draw_grid(self):
-		gl.glColor4f(0.23, 0.23, 0.23, 1.0)
-		#Horizontal lines
-		for i in range(rows):
-			graphics.draw(2, gl.GL_LINES, ('v2i', (0, i * cell_size, window_width, i * cell_size)))
-		#Vertical lines
-		for j in range(columns):
-			graphics.draw(2, gl.GL_LINES, ('v2i', (j * cell_size, 0, j * cell_size, window_height)))
+    def rectangle(self, x1, y1, x2, y2):
+        graphics.draw(4, gl.GL_QUADS, ('v2f', (x1, y1, x1, y2, x2, y2, x2, y1)))
 
 
-	def draw(self):
-		self.clear()
-
-		#White color for white cells
-		gl.glColor4f(1.0, 1.0, 1.0, 1.0)
-
-		for f in range(len(self.cells)):
-			current_row = self.cells[f]
-			for c in range(len(current_row)):
-				if current_row[c]:
-					self.rectangle(c * cell_size, f * cell_size, c * cell_size + cell_size, f * cell_size + cell_size)
-
-		self.draw_grid()
-
-		#ant's color
-		gl.glColor4f(1.0, 0.23, 0.23, 1.0)
-
-		self.rectangle(self.ant.posx * cell_size, self.ant.posy * cell_size,
-		self.ant.posx * cell_size + cell_size, self.ant.posy * cell_size + cell_size)
+    def draw_grid(self):
+        gl.glColor4f(0.23, 0.23, 0.23, 1.0)
+        #Horizontal lines
+        for i in range(rows):
+            graphics.draw(2, gl.GL_LINES, ('v2i', (0, i * cell_size, window_width, i * cell_size)))
+        #Vertical lines
+        for j in range(columns):
+            graphics.draw(2, gl.GL_LINES, ('v2i', (j * cell_size, 0, j * cell_size, window_height)))
 
 
-	def main_loop(self):
-		#Create a font for our Steps label
-		ft = font.load('Arial', 16)
-		#The pyglet.font.Text object to display the steps
-		steps_text = font.Text(ft, y=10, color=(1.0, 0.0, 0.0, 1.0))
+    def draw(self):
+        self.clear()
 
-		clock.set_fps_limit(60)
+        #White color for white cells
+        gl.glColor4f(1.0, 1.0, 1.0, 1.0)
 
-		while not self.has_exit:
-			self.dispatch_events()
+        for f in range(len(self.cells)):
+            current_row = self.cells[f]
+            for c in range(len(current_row)):
+                if current_row[c]:
+                    self.rectangle(c * cell_size, f * cell_size, c * cell_size + cell_size, f * cell_size + cell_size)
 
-			self.move()
-			self.draw()
+        self.draw_grid()
 
-			#Tick the clock
-			clock.tick()
-			#Show the number of steps performed by the ant
-			steps_text.text = "Steps: %d" % self.steps
-			steps_text.draw()
-			self.flip()
+        #ant's color
+        gl.glColor4f(1.0, 0.23, 0.23, 1.0)
+
+        self.rectangle(self.ant.posx * cell_size, self.ant.posy * cell_size,
+        self.ant.posx * cell_size + cell_size, self.ant.posy * cell_size + cell_size)
 
 
-	def move(self):
-		#Is the ant on a white cell? => Make the cell black, turn 90º right, move forward one cell
-		if self.cells[self.ant.posy][self.ant.posx]:
-			self.cells[self.ant.posy][self.ant.posx] = False
-			self.ant.turn('right')
-		#Is the ant on a black cell? => Make the cell white, turn 90º left, move forward one cell
-		else:
-			self.cells[self.ant.posy][self.ant.posx] = True
-			self.ant.turn('left')
+    def main_loop(self):
+        #Create a font for our Steps label
+        ft = font.load('Arial', 16)
+        #The pyglet.font.Text object to display the steps
+        steps_text = font.Text(ft, y=10, color=(1.0, 0.0, 0.0, 1.0))
 
-		self.steps += 1
+        clock.set_fps_limit(60)
+
+        while not self.has_exit:
+            self.dispatch_events()
+
+            self.move()
+            self.draw()
+
+            #Tick the clock
+            clock.tick()
+            #Show the number of steps performed by the ant
+            steps_text.text = "Steps: %d" % self.steps
+            steps_text.draw()
+            self.flip()
+
+
+    def move(self):
+        #Is the ant on a white cell? => Make the cell black, turn 90º right, move forward one cell
+        if self.cells[self.ant.posy][self.ant.posx]:
+            self.cells[self.ant.posy][self.ant.posx] = False
+            self.ant.turn('right')
+        #Is the ant on a black cell? => Make the cell white, turn 90º left, move forward one cell
+        else:
+            self.cells[self.ant.posy][self.ant.posx] = True
+            self.ant.turn('left')
+
+        self.steps += 1
 
 
 if __name__ == "__main__":
-	h = Grid(window_width, window_height)
-	h.main_loop()
+    h = Grid(window_width, window_height)
+    h.main_loop()
