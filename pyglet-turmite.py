@@ -57,9 +57,9 @@ class Ant:
         self.dir = 2                        #initial direction: right
         self.dirs = (
                     (-1, 0),                #left
-                    (0, 1),                    #up
-                    (1, 0),                    #right
-                    (0, -1)                    #down
+                    (0, 1),                 #up
+                    (1, 0),                 #right
+                    (0, -1)                 #down
                     )
 
 
